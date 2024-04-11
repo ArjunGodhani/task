@@ -1,0 +1,19 @@
+In this practical you have to create a todo list using html and JS only. ESTIMATED TIME(2.5 hrs)
+
+Requirements: (YOU CAN USE LOCAL STORAGE)
+
+Todo item must contain below fields
+title,description, createdAt, updatedAt, isCompleted
+
+User must contain below fields
+name, email(must be unique), password, and a unique ID
+
+PAGES:
+- A page with form where user can register
+- A page where the user can login
+- A todo page
+    - Provide a field where user can create a new todo item
+    - Show all the todos in the list/table
+    - Manage CRUD operations so that the user can create/update/delete the todo item
+        - todo item can be marked as done/undone
+        - todo item description and title can be updated

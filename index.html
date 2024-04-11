@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>Home Page</h1>
+    <nav>
+      <ul>
+        <li><a href="Login.html">Login</a></li>
+        <li><a href="SignUp.html">Signup</a></li>
+        <li><a href="#" id="homeLink">Home</a></li>
+      </ul>
+    </nav>
+
+    <section id="todoSection" style="display: none">
+      <h2>To-Do List</h2>
+      <form id="todoForm">
+        <input type="text" id="todoTitle" placeholder="Title" required />
+        <textarea
+          id="todoDescription"
+          placeholder="Description"
+          required
+        ></textarea>
+        <input type="hidden" id="editingTodoId" />
+        <button type="submit">Add To-Do</button>
+      </form>
+      <ul id="todoList"></ul>
+    </section>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        displayLoggedInUser();
+        displayTodos();
+      });
+
+      function checkLoginStatus() {
+        const loggedInUserId = localStorage.getItem("loggedInUserId");
+        if (!loggedInUserId) {
+          window.location.href = "Login.html";
+        }
+      }
+
+      document
+        .getElementById("homeLink")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          checkLoginStatus();
+        });
+
+      function displayLoggedInUser() {
+        const loggedInUserId = localStorage.getItem("loggedInUserId");
+        if (loggedInUserId) {
+          document.getElementById("todoSection").style.display = "block";
+        } else {
+          document.getElementById("todoSection").style.display = "none";
+        }
+      }
+
+      document
+        .getElementById("todoForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const editingId = document.getElementById("editingTodoId").value;
+
+          if (editingId) {
+            updateTodo(editingId);
+          } else {
+            addTodo();
+          }
+        });
+
+      function addTodo() {
+        const title = document.getElementById("todoTitle").value.trim();
+        const description = document
+          .getElementById("todoDescription")
+          .value.trim();
+        const userId = localStorage.getItem("loggedInUserId");
+        if (!userId) {
+          alert("You are not logged in.");
+          return;
+        }
+
+        const todo = {
+          id: Date.now(),
+          title: title,
+          description: description,
+          createdAt: new Date().toISOString(),
+          updatedAt: null,
+          isCompleted: false,
+          userId: userId,
+        };
+
+        const todos = JSON.parse(localStorage.getItem("todos")) || [];
+        todos.push(todo);
+        localStorage.setItem("todos", JSON.stringify(todos));
+        displayTodos();
+        resetForm();
+      }
+
+      function updateTodo(id) {
+        const title = document.getElementById("todoTitle").value.trim();
+        const description = document
+          .getElementById("todoDescription")
+          .value.trim();
+        const todos = JSON.parse(localStorage.getItem("todos"));
+        const index = todos.findIndex((todo) => todo.id.toString() === id);
+
+        if (index !== -1) {
+          todos[index].title = title;
+          todos[index].description = description;
+          todos[index].updatedAt = new Date().toISOString();
+
+          localStorage.setItem("todos", JSON.stringify(todos));
+          displayTodos();
+          resetForm();
+        }
+      }
+
+      function toggleComplete(id) {
+        const todos = JSON.parse(localStorage.getItem("todos"));
+        const index = todos.findIndex((todo) => todo.id === id);
+
+        if (index !== -1) {
+          todos[index].isCompleted = !todos[index].isCompleted;
+          localStorage.setItem("todos", JSON.stringify(todos));
+          displayTodos();
+        }
+      }
+
+      function editTodo(id) {
+        const todos = JSON.parse(localStorage.getItem("todos"));
+        const todo = todos.find((todo) => todo.id === id);
+        if (todo) {
+          document.getElementById("todoTitle").value = todo.title;
+          document.getElementById("todoDescription").value = todo.description;
+          document.getElementById("editingTodoId").value = todo.id;
+        }
+      }
+
+      function deleteTodo(id) {
+        let todos = JSON.parse(localStorage.getItem("todos"));
+        todos = todos.filter((todo) => todo.id !== id);
+        localStorage.setItem("todos", JSON.stringify(todos));
+        displayTodos();
+      }
+
+      function resetForm() {
+        document.getElementById("todoForm").reset();
+        document.getElementById("editingTodoId").value = "";
+      }
+
+      function displayTodos() {
+        const loggedInUserId = localStorage.getItem("loggedInUserId");
+        const todos = JSON.parse(localStorage.getItem("todos")) || [];
+        const userTodos = todos.filter(
+          (todo) => todo.userId === loggedInUserId
+        );
+        const todoList = document.getElementById("todoList");
+        todoList.innerHTML = "";
+
+        userTodos.forEach((todo) => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+                    <input type="checkbox" ${
+                      todo.isCompleted ? "checked" : ""
+                    } onchange="toggleComplete(${todo.id})"> 
+                    <span ${
+                      todo.isCompleted
+                        ? 'style="text-decoration: line-through;"'
+                        : ""
+                    }>${todo.title} - ${todo.description}</span>
+                    <button onclick="editTodo(${todo.id})">Edit</button>
+                    <button onclick="deleteTodo(${todo.id})">Delete</button>
+                `;
+          todoList.appendChild(li);
+        });
+      }
+
+      window.toggleComplete = toggleComplete;
+      window.editTodo = editTodo;
+      window.deleteTodo = deleteTodo;
+    </script>
+  </body>
+</html>

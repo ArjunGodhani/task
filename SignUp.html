@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Signup</h1>
+    <nav>
+      <ul>
+        <li><a href="Login.html">Login</a></li>
+        <li><a href="SignUp.html">Signup</a></li>
+        <li><a href="#" id="homeLink">Home</a></li>
+      </ul>
+    </nav>
+    <div id="signup-form">
+      <h2>Sign Up</h2>
+      <form id="registerForm">
+        <input type="text" id="name" placeholder="Name" required /><br />
+        <input type="email" id="email" placeholder="Email" required /><br />
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+        /><br />
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          const users = JSON.parse(localStorage.getItem("users")) || [];
+          const userId = Date.now();
+
+          const emailExists = users.some((user) => user.email === email);
+          if (emailExists) {
+            alert("Email already registered.");
+            return;
+          }
+
+          const newUser = {
+            id: userId,
+            name: name,
+            email: email,
+            password: password,
+          };
+
+          users.push(newUser);
+
+          localStorage.setItem("users", JSON.stringify(users));
+
+          alert("Signup successful! Your ID is " + userId);
+          document.getElementById("registerForm").reset();
+        });
+
+      function checkLoginStatus() {
+        const loggedInUserId = localStorage.getItem("loggedInUserId");
+        if (!loggedInUserId) {
+          window.location.href = "Login.html";
+        }
+      }
+
+      document
+        .getElementById("homeLink")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          checkLoginStatus();
+        });
+    </script>
+  </body>
+</html>
